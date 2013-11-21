@@ -6,6 +6,7 @@
 use strict;
 use warnings;
 use FindBin;
+use IO::File;
 
 use lib "$FindBin::Bin/lib";
 use kbuild;
@@ -37,4 +38,18 @@ if($args_num == 1 && $first_arg =~ /--help/) {
 if(REQUIRED_ARGS != $#ARGV+1) {
 	print "Usage: pconf.pl [--intree | --out-of-tree | --help] [config input]\n";
 	exit 1;
+}
+
+# Program has been called correctly
+# Call the parser
+my $conf = read_confin $second_arg;
+my $answer;
+
+for my $key (keys(%$conf)) {
+	if($conf->{$key}->{'type'} =~ /tristate/) {
+		print "Enable option \"$key\"? (Y/M/N) ";
+	} else {
+		print "Enable option \"$key\"? (Y/N) ";
+	}
+	$answer = <STDIN>;
 }
