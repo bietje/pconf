@@ -13,19 +13,27 @@ use kbuild;
 use kconfig;
 use pconf_reader;
 
-use constant REQUIRED_ARGS => 2;
+use constant REQUIRED_ARGS => 4;
 
 my $args_num = $#ARGV+1;
 my $first_arg = $ARGV[0];
 my $second_arg = $ARGV[1];
+my $third_arg = $ARGV[2];
+my $forth_arg = $ARGV[3];
+
+my $help_text_short = "Usage: pconf.pl [--intree | --out-of-tree | --help] --output [output file] [config input]\n";
 my $help_text = <<"END_HELP";
 PConf is a perl based configure script for Linux kernel modules. To configure your kernel for out-of-tree building use:
 
-	pconf.pl --out-of-tree [config input]
+	pconf.pl --out-of-tree --output [Kbuild file] [config input]
+
+Where [Kbuild file] points the location where the Kbuild content should be written to. [config input], on the other hand is the input config file.
 
 For in-tree building:
 
-	pconf.pl --intree [config input]
+	pconf.pl --intree --output [Kconfig] [config input]
+
+Where [Kconfig file] points the location where the Kconfig content should be written to. [config input], on the other hand is the input config file.
 
 The [config input] argument is the path to your config.in file.
 END_HELP
@@ -36,9 +44,20 @@ if($args_num == 1 && $first_arg =~ /--help/) {
 }
 
 if(REQUIRED_ARGS != $#ARGV+1) {
-	print "Usage: pconf.pl [--intree | --out-of-tree | --help] [config input]\n";
+	print $help_text_short;
 	exit 1;
 }
+
+my $parser;
+
+if($first_arg =~ /--out-of-tree/ || $third_arg =~ /--out-of-tree/) {
+	$parser = "gen_kbuild";
+}
+
+if($first_arg =~ /--in-tree/ || $third_arg =~ /--in-tree/) {
+	$parser = "gen_kconfig";
+}
+
 
 # Program has been called correctly
 # Call the parser
