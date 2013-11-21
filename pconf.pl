@@ -7,6 +7,7 @@ use warnings;
 use FindBin;
 use IO::File;
 use Data::Dumper;
+use Getopt::Mixed;
 
 use lib "$FindBin::Bin/lib";
 use kbuild;
@@ -15,56 +16,62 @@ use pconf_reader;
 
 use constant REQUIRED_ARGS => 4;
 
-my $args_num = $#ARGV+1;
-my $first_arg = $ARGV[0];
-my $second_arg = $ARGV[1];
-my $third_arg = $ARGV[2];
-my $forth_arg = $ARGV[3];
-
-my $help_text_short = "Usage: pconf.pl [--intree | --out-of-tree | --help] --output [output file] [config input]\n";
+my $help_text_short = "Usage: pconf.pl [--intree | --outoftree | --help] [-b [FILE] -a [FILE] || -k [FILE]] -i [FILE]\n";
 my $help_text = <<"END_HELP";
-PConf is a perl based configure script for Linux kernel modules. To configure your kernel for out-of-tree building use:
+Usage: pconf.pl [OPTIONS] -i [FILE]
+PConf is a perl based configure script for Linux kernel modules.
 
-	pconf.pl --out-of-tree --output [Kbuild file] [config input]
-
-Where [Kbuild file] points the location where the Kbuild content should be written to. [config input], on the other hand is the input config file.
-
-For in-tree building:
-
-	pconf.pl --intree --output [Kconfig] [config input]
-
-Where [Kconfig file] points the location where the Kconfig content should be written to. [config input], on the other hand is the input config file.
-
-The [config input] argument is the path to your config.in file.
+	-b --kbuild=PATH        Kbuild output file (path to)
+	-a --autoheader=PATH    autoheader.h output file (path to)
+	-k --kconfig=PATH       Kconfig output file (path to)
+	-i --confin=PATH        Input config file
+	-t --outoftree          When defined, the script will configure for an out-of-tree build.
+	-I --intree             When specified, the script will configure for an in-tree-build.
 END_HELP
 
-if($args_num == 1 && $first_arg =~ /--help/) {
-	print $help_text;
-	exit 0;
+# declare some argument parsing vars
+my ($kconf_set, $kbuild_set) = (undef, undef);
+my ($kbuild_out, $ah_out, $kconf_out, $confin) = (undef, undef, undef, undef);
+
+# parse the arguments using Getopt::Mixed
+Getopt::Mixed::init(q{b=s kbuild>b
+a=s autoheader>a
+k=s kconfig>k
+i=s confin>i
+t outoftree>t
+I intree>I
+h help>h});
+
+
+while( my( $option, $arg_val, $pretty ) = Getopt::Mixed::nextOption()) {
+	$kbuild_out = $arg_val if $option eq "kbuild" or $option eq 'b';
+	$ah_out = $arg_val if $option eq "autoheader" or $option eq 'a';
+	$kconf_out = $arg_val if $option eq "kconfig" or $option eq 'c';
+	$confin = $arg_val if $option eq "confin" or $option eq 'i';
+	$kconf_set = 1 if $option eq 'I' or $option eq "intree";
+	$kbuild_set = 1 if $option eq 't' or $option eq "outoftree";
+
+	if($option eq 'h' || $option eq "help") {
+		print $help_text;
+		exit;
+	}
 }
 
-if(REQUIRED_ARGS != $#ARGV+1) {
-	print $help_text_short;
-	exit 1;
-}
+die $help_text_short if defined $kconf_set and defined $kbuild_set; # cannot set both
+die $help_text_short if !defined $kconf_set and !defined $kbuild_set; # must set one
+die $help_text_short if !defined $kbuild_out and !defined $kconf_out; # must set one
 
-my $parser;
-
-if($first_arg =~ /--out-of-tree/ || $third_arg =~ /--out-of-tree/) {
-	$parser = "gen_kbuild";
-}
-
-if($first_arg =~ /--in-tree/ || $third_arg =~ /--in-tree/) {
-	$parser = "gen_kconfig";
+if(defined $kbuild_set && !defined $ah_out) {
+	die 'You must specify an autoheader path for building out of tree.';
 }
 
 # Program has been called correctly
 # Call the parser
-my $conf = read_confin $forth_arg;
+my $conf = read_confin $confin;
 
 # We don't need to actually configure to generate a Kconfig file
-if($parser =~ /gen_kconfig/) {
-	&$parser($conf);
+if(defined $kconf_set) {
+	gen_kconfig($conf);
 	exit 0;
 }
 
