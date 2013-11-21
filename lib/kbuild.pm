@@ -5,11 +5,10 @@ package kbuild;
 use strict;
 use warnings;
 use IO::File;
-use Data::Dumper;
 
 use Exporter 'import';
 our $VERSION = '1.00';
-our @EXPORT = qw(kbuild_gen kbuild_add_option kbuild_add_ah_option);
+our @EXPORT = qw(kbuild_gen kbuild_gen_extra kbuild_add_option kbuild_add_ah_option);
 
 #
 # kbuild_add_option(@array, $option, $value)
@@ -36,15 +35,23 @@ sub kbuild_add_ah_option(\@$$)
 }
 
 #
-# gen_kbuild($kbuild_file, $conf_out, @kbuild_data, $ah_file, @autoheader_data)
+# kbuild_gen($kbuild_input)
 #
-sub kbuild_gen($$\@$\@)
+sub kbuild_gen($)
 {
-	my $conf_out = $_[1];
-	my $kbuild_file = $_[0];
-	my $kbuild_data = $_[2];
-	my $ah_file = $_[3];
-	my $ah_data = $_[4];
+	
+}
+
+#
+# gen_kbuild($conf_out, @config_data, $ah_file, @autoheader_data)
+#
+sub kbuild_gen_extra($\@$\@)
+{
+	my $conf_out = $_[0];
+# 	my $kbuild_file = $_[0];
+	my $config_data = $_[1];
+	my $ah_file = $_[2];
+	my $ah_data = $_[3];
 	
 	#auto header data
 	my $autoheader_prefix = <<"AUTOHEADER_END";
@@ -70,7 +77,7 @@ AUTOHEADER_END
 
 	# print the .config file
 	print $cfd $kbuild_prefix;
-	print $cfd @$kbuild_data;
+	print $cfd @$config_data;
 
 	# print the autoheader
 	print $afd $autoheader_prefix;

@@ -6,7 +6,6 @@ use strict;
 use warnings;
 use JSON::XS;
 use IO::File;
-use Data::Dumper;
 
 use Exporter 'import';
 our $VERSION = '1.00';

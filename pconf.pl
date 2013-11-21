@@ -6,13 +6,16 @@ use strict;
 use warnings;
 use FindBin;
 use IO::File;
-use Data::Dumper;
+use File::Basename;
 use Getopt::Mixed;
 
+use Cwd "abs_path";
 use lib "$FindBin::Bin/lib";
 use kbuild;
 use kconfig;
 use pconf_reader;
+
+use constant MAKE_USER_INPUT => './Makefile.in';
 
 my $help_text_short = "Usage: pconf.pl [--intree | --outoftree | --help] [-b [FILE] -a [FILE] || -k [FILE]] [FILE]\n";
 my $help_text = <<"END_HELP";
@@ -25,10 +28,11 @@ PConf is a perl based configure script for Linux kernel modules.
 	-c --confout=PATH       Output config file
 	-t --outoftree          When defined, the script will configure for an out-of-tree build.
 	-I --intree             When specified, the script will configure for an in-tree-build.
+	-m --make-in=PATH       When specified it will use this file as Makefile input.
 END_HELP
 
 # declare some argument parsing vars
-my ($kconf_set, $kbuild_set) = (undef, undef);
+my ($kconf_set, $kbuild_set, $make_in) = (undef, undef, MAKE_USER_INPUT);
 my ($kbuild_out, $ah_out, $kconf_out, $confout) = (undef, undef, undef, undef);
 
 # parse the arguments using Getopt::Mixed
@@ -38,14 +42,15 @@ k=s kconfig>k
 c=s confout>c
 t outoftree>t
 i intree>i
+m make-in>m
 h help>h});
-
 
 while( my( $option, $arg_val, $pretty ) = Getopt::Mixed::nextOption()) {
 	$kbuild_out = $arg_val if $option eq "kbuild" or $option eq 'b';
 	$ah_out = $arg_val if $option eq "autoheader" or $option eq 'a';
 	$kconf_out = $arg_val if $option eq "kconfig" or $option eq 'c';
 	$confout = $arg_val if $option eq "confout" or $option eq 'c';
+	$make_in = $arg_val if $option eq "make-in" or $option eq 'm';
 	$kconf_set = 1 if $option eq 'i' or $option eq "intree";
 	$kbuild_set = 1 if $option eq 't' or $option eq "outoftree";
 
@@ -122,4 +127,4 @@ for my $key (keys(%$conf)) {
 	kbuild_add_ah_option(@autoheader, $conf->{$key}->{'definition'}, $value);
 }
 
-kbuild_gen($kbuild_out, $confout, @configfile, $ah_out, @autoheader);
+kbuild_gen_extra($confout, @configfile, $ah_out, @autoheader);
