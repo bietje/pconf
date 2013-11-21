@@ -2,11 +2,11 @@
 
 # Add local lib dir
 
-
 use strict;
 use warnings;
 use FindBin;
 use IO::File;
+use Data::Dumper;
 
 use lib "$FindBin::Bin/lib";
 use kbuild;
@@ -58,17 +58,56 @@ if($first_arg =~ /--in-tree/ || $third_arg =~ /--in-tree/) {
 	$parser = "gen_kconfig";
 }
 
-
 # Program has been called correctly
 # Call the parser
-my $conf = read_confin $second_arg;
+my $conf = read_confin $forth_arg;
+
+# We don't need to actually configure to generate a Kconfig file
+if($parser =~ /gen_kconfig/) {
+	&$parser($conf);
+	exit 0;
+}
+
+# Ask a series of questions to eventually generate a Kbuild file.
 my $answer;
+my $value;
+my $question;
+my @autoheader = ();
+my @configfile = ();
 
 for my $key (keys(%$conf)) {
 	if($conf->{$key}->{'type'} =~ /tristate/) {
-		print "Enable option \"$key\"? (Y/M/N) ";
+		print "Enable option \"$key\"? (Y/M/N/help) ";
+		$question = "Enable option \"$key\"? (Y/M/N/help) ";
 	} else {
-		print "Enable option \"$key\"? (Y/N) ";
+		print "Enable option \"$key\"? (Y/N/help) ";
+		$question = "Enable option \"$key\"? (Y/N/help) ";
 	}
 	$answer = <STDIN>;
+
+	if($answer =~ /help/ || $answer =~ /h/ || $answer =~ /H/) {
+		print $conf->{$key}->{'info'} . "\n";
+		$question =~ s/\/help//g;
+		print $question;
+		$answer = <STDIN>;
+	}
+
+	if(!($conf->{$key}->{'type'} =~ /tristate/) && ($answer =~ /m/ || $answer =~ /M/)) {
+		# if its not a tristate, don't set it as module, you bloody idiot.. asume Y
+		$answer = 'y';
+	}
+
+	print "What value should be assigned to it? ";
+	$value = <STDIN>;
+
+	# cut off the new line feeds
+	chomp $answer;
+	chomp $value;
+
+	# now save the option
+	kbuild_add_option(\@configfile, $conf->{$key}->{'definition'}, $answer);
+	kbuild_add_ah_option(\@autoheader, $conf->{$key}->{'definition'}, $value);
 }
+
+print Dumper(@configfile) . "\n";
+print Dumper(@autoheader) . "\n";
