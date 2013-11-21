@@ -14,32 +14,30 @@ use kbuild;
 use kconfig;
 use pconf_reader;
 
-use constant REQUIRED_ARGS => 4;
-
-my $help_text_short = "Usage: pconf.pl [--intree | --outoftree | --help] [-b [FILE] -a [FILE] || -k [FILE]] -i [FILE]\n";
+my $help_text_short = "Usage: pconf.pl [--intree | --outoftree | --help] [-b [FILE] -a [FILE] || -k [FILE]] [FILE]\n";
 my $help_text = <<"END_HELP";
-Usage: pconf.pl [OPTIONS] -i [FILE]
+Usage: pconf.pl [OPTIONS] [FILE]
 PConf is a perl based configure script for Linux kernel modules.
 
 	-b --kbuild=PATH        Kbuild output file (path to)
 	-a --autoheader=PATH    autoheader.h output file (path to)
 	-k --kconfig=PATH       Kconfig output file (path to)
-	-i --confin=PATH        Input config file
+	-c --confout=PATH       Output config file
 	-t --outoftree          When defined, the script will configure for an out-of-tree build.
 	-I --intree             When specified, the script will configure for an in-tree-build.
 END_HELP
 
 # declare some argument parsing vars
 my ($kconf_set, $kbuild_set) = (undef, undef);
-my ($kbuild_out, $ah_out, $kconf_out, $confin) = (undef, undef, undef, undef);
+my ($kbuild_out, $ah_out, $kconf_out, $confout) = (undef, undef, undef, undef);
 
 # parse the arguments using Getopt::Mixed
 Getopt::Mixed::init(q{b=s kbuild>b
 a=s autoheader>a
 k=s kconfig>k
-i=s confin>i
+c=s confout>c
 t outoftree>t
-I intree>I
+i intree>i
 h help>h});
 
 
@@ -47,14 +45,22 @@ while( my( $option, $arg_val, $pretty ) = Getopt::Mixed::nextOption()) {
 	$kbuild_out = $arg_val if $option eq "kbuild" or $option eq 'b';
 	$ah_out = $arg_val if $option eq "autoheader" or $option eq 'a';
 	$kconf_out = $arg_val if $option eq "kconfig" or $option eq 'c';
-	$confin = $arg_val if $option eq "confin" or $option eq 'i';
-	$kconf_set = 1 if $option eq 'I' or $option eq "intree";
+	$confout = $arg_val if $option eq "confout" or $option eq 'c';
+	$kconf_set = 1 if $option eq 'i' or $option eq "intree";
 	$kbuild_set = 1 if $option eq 't' or $option eq "outoftree";
 
 	if($option eq 'h' || $option eq "help") {
 		print $help_text;
 		exit;
 	}
+}
+
+Getopt::Mixed::cleanup();
+
+my $confin = $ARGV[0];
+
+if(!defined $confin) {
+	die $help_text_short;
 }
 
 die $help_text_short if defined $kconf_set and defined $kbuild_set; # cannot set both
@@ -112,9 +118,8 @@ for my $key (keys(%$conf)) {
 	chomp $value;
 
 	# now save the option
-	kbuild_add_option(\@configfile, $conf->{$key}->{'definition'}, $answer);
-	kbuild_add_ah_option(\@autoheader, $conf->{$key}->{'definition'}, $value);
+	kbuild_add_option(@configfile, $conf->{$key}->{'definition'}, $answer);
+	kbuild_add_ah_option(@autoheader, $conf->{$key}->{'definition'}, $value);
 }
 
-print Dumper(@configfile) . "\n";
-print Dumper(@autoheader) . "\n";
+kbuild_gen($kbuild_out, $confout, @configfile, $ah_out, @autoheader);

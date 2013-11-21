@@ -32,9 +32,6 @@ sub read_confin
 		$json_in .= $_;
 	}
 	return decode_json($json_in);
-
-
-
 }
 
 "1";
