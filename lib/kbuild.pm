@@ -83,8 +83,6 @@ AUTOHEADER_END
 	print $afd $autoheader_prefix;
 	print $afd @$ah_data;
 	print $afd $autoheader_suffix;
-
-	# TODO: print the Kbuild file
 	
 	# close files and done!
 	$afd->close;
