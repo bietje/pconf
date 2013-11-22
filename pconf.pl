@@ -9,6 +9,7 @@ use IO::File;
 use File::Basename;
 use Getopt::Mixed;
 
+use Cwd;
 use Cwd "abs_path";
 use lib "$FindBin::Bin/lib";
 use kbuild;
@@ -45,12 +46,14 @@ i intree>i
 m make-in>m
 h help>h});
 
+my $cwd = cwd();
+
 while( my( $option, $arg_val, $pretty ) = Getopt::Mixed::nextOption()) {
-	$kbuild_out = $arg_val if $option eq "kbuild" or $option eq 'b';
-	$ah_out = $arg_val if $option eq "autoheader" or $option eq 'a';
-	$kconf_out = $arg_val if $option eq "kconfig" or $option eq 'c';
-	$confout = $arg_val if $option eq "confout" or $option eq 'c';
-	$make_in = $arg_val if $option eq "make-in" or $option eq 'm';
+	$kbuild_out = $cwd . "/" . $arg_val if $option eq "kbuild" or $option eq 'b';
+	$ah_out = $cwd . "/" . $arg_val if $option eq "autoheader" or $option eq 'a';
+	$kconf_out = $cwd . "/" . $arg_val if $option eq "kconfig" or $option eq 'c';
+	$confout = $cwd . "/" . $arg_val if $option eq "confout" or $option eq 'c';
+	$make_in = $cwd . "/" . $arg_val if $option eq "make-in" or $option eq 'm';
 	$kconf_set = 1 if $option eq 'i' or $option eq "intree";
 	$kbuild_set = 1 if $option eq 't' or $option eq "outoftree";
 
@@ -62,7 +65,7 @@ while( my( $option, $arg_val, $pretty ) = Getopt::Mixed::nextOption()) {
 
 Getopt::Mixed::cleanup();
 
-my $confin = $ARGV[0];
+my $confin = $cwd . "/" . $ARGV[0];
 
 if(!defined $confin) {
 	die $help_text_short;
