@@ -60,7 +60,7 @@ sub kbuild_add_ah_option(\@$$)
 sub kbuild_gen($$$)
 {
 	my ($kbuild_out, $inc_file, $make_in) = @_;
-	$inc_file =~ s/.\///g; # Strip ./ from file names such as ./.config
+	$inc_file =~ s/\.\///g; # Strip ./ from file names such as ./.config
 	
 	my $kbuild_input = dirname(abs_path($0)) . "/" . KBUILD_TEMPLATE;
 	
