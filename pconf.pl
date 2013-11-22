@@ -43,7 +43,7 @@ k=s kconfig>k
 c=s confout>c
 t outoftree>t
 i intree>i
-m make-in>m
+m=s make-in>m
 h help>h});
 
 my $cwd = cwd();
