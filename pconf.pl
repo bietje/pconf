@@ -104,13 +104,13 @@ for my $key (keys(%$conf)) {
 		print "Enable option \"$key\"? (Y/N/help) ";
 		$question = "Enable option \"$key\"? (Y/N/help) ";
 	}
-	$answer = <STDIN>;
+	$answer = lc <STDIN>;
 
 	if($answer =~ /help/ || $answer =~ /h/ || $answer =~ /H/) {
 		print $conf->{$key}->{'info'} . "\n";
 		$question =~ s/\/help//g;
 		print $question;
-		$answer = <STDIN>;
+		$answer = lc <STDIN>;
 	}
 
 	if(!($conf->{$key}->{'type'} =~ /tristate/) && ($answer =~ /m/ || $answer =~ /M/)) {
