@@ -2,3 +2,4 @@
 config.in
 autoheader.h
 Makefile.in
+Kbuild
