@@ -1,3 +1,4 @@
 .config
 config.in
 autoheader.h
+Makefile.in
