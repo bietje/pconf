@@ -113,21 +113,24 @@ for my $key (keys(%$conf)) {
 		$answer = lc <STDIN>;
 	}
 
-	if(!($conf->{$key}->{'type'} =~ /tristate/) && ($answer =~ /m/ || $answer =~ /M/)) {
-		# if its not a tristate, don't set it as module, you bloody idiot.. asume Y
-		$answer = 'y';
+	if($answer =~ /m/ || $answer =~ /y/) {
+
+		if(!($conf->{$key}->{'type'} =~ /tristate/) && ($answer =~ /m/ || $answer =~ /M/)) {
+			# if its not a tristate, don't set it as module, you bloody idiot.. asume Y
+			$answer = 'y';
+		}
+
+		print "What value should be assigned to it? ";
+		$value = <STDIN>;
+
+		# cut off the new line feeds
+		chomp $answer;
+		chomp $value;
+
+		# now save the option
+		kbuild_add_option(@configfile, $conf->{$key}->{'definition'}, $answer);
+		kbuild_add_ah_option(@autoheader, $conf->{$key}->{'definition'}, $value);
 	}
-
-	print "What value should be assigned to it? ";
-	$value = <STDIN>;
-
-	# cut off the new line feeds
-	chomp $answer;
-	chomp $value;
-
-	# now save the option
-	kbuild_add_option(@configfile, $conf->{$key}->{'definition'}, $answer);
-	kbuild_add_ah_option(@autoheader, $conf->{$key}->{'definition'}, $value);
 }
 
 kbuild_gen($kbuild_out, $confout, $make_in);
