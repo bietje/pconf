@@ -11,7 +11,7 @@ use Data::Dumper;
 our $VERSION = '1.00';
 our @EXPORT = qw(kconfig_gen);
 
-my $CONFIG_INFO = 'Kconfig_driver_info';
+my $CONFIG_INFO = 'PConf_driver_info';
 
 sub kconfig_gen(\%$);
 
@@ -27,11 +27,11 @@ sub kconfig_gen(\%$)
 #
 
 KCONFIG_PREFFIX_END
-	$kconfig_prefix .= "menuconfig " . $options->{$CONFIG_INFO}->{'name'} . "\n";
+	$kconfig_prefix .= "menuconfig " . $options->{$CONFIG_INFO}->{'definition'} . "\n";
 	$kconfig_prefix .= "\t". $options->{$CONFIG_INFO}->{'type'} . " " .
 							"\"" . $options->{$CONFIG_INFO}->{'short'} . "\"\n";
 	$kconfig_prefix .= "\t---help---\n\t  " . $options->{$CONFIG_INFO}->{'info'} . "\n\n";
-	$kconfig_prefix .= "if " . $options->{$CONFIG_INFO}->{'name'} . "\n";
+	$kconfig_prefix .= "if " . $options->{$CONFIG_INFO}->{'definition'} . "\n";
 	
 	my $kfd = IO::File->new($kconfig_file, O_WRONLY | O_CREAT | O_TRUNC)
 				or die 'Couldn\'t open the specified output file!';

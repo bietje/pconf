@@ -18,6 +18,7 @@ use kconfig;
 use pconf_reader;
 
 use constant MAKE_USER_INPUT => './Makefile.in';
+my $PCONF_DRIVER_INFO = 'PConf_driver_info';
 
 my $help_text_short = "Usage: pconf.pl [--intree | --outoftree | --help] [-b [FILE] -a [FILE] || -k [FILE]] [FILE]\n";
 my $help_text = <<"END_HELP";
@@ -98,7 +99,7 @@ my @autoheader = ();
 my @configfile = ();
 
 for my $key (keys(%$conf)) {
-	next if $key eq "Kconfig_driver_info";
+	next if $key eq "$PCONF_DRIVER_INFO";
 	
 	if($conf->{$key}->{'type'} =~ /tristate/) {
 		print "Enable option \"$key\"? (Y/M/N/help) ";
@@ -135,6 +136,9 @@ for my $key (keys(%$conf)) {
 		kbuild_add_ah_option(@autoheader, $conf->{$key}->{'definition'}, $value);
 	}
 }
+
+kbuild_add_option(@configfile, $conf->{$PCONF_DRIVER_INFO}->{'definition'}, 'm');
+kbuild_add_ah_option(@autoheader, $conf->{$PCONF_DRIVER_INFO}->{'definition'}, '');
 
 kbuild_gen($kbuild_out, $confout, $make_in);
 kbuild_gen_extra($confout, @configfile, $ah_out, @autoheader);
