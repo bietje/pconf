@@ -127,4 +127,5 @@ for my $key (keys(%$conf)) {
 	kbuild_add_ah_option(@autoheader, $conf->{$key}->{'definition'}, $value);
 }
 
+kbuild_gen($kbuild_out, $confout, $make_in);
 kbuild_gen_extra($confout, @configfile, $ah_out, @autoheader);
