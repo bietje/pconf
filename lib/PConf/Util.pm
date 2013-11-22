@@ -5,8 +5,6 @@ package PConf::Util;
 use strict;
 use warnings;
 
-use Data::Dumper;
-
 use Exporter 'import';
 our $VERSION = '1.00';
 our @EXPORT = qw(pconf_array_to_string);

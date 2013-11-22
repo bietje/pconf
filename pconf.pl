@@ -8,6 +8,7 @@ use FindBin;
 use IO::File;
 use File::Basename;
 use Getopt::Mixed;
+use Data::Dumper;
 
 use Cwd;
 use Cwd "abs_path";
@@ -51,7 +52,7 @@ my $cwd = cwd();
 while( my( $option, $arg_val, $pretty ) = Getopt::Mixed::nextOption()) {
 	$kbuild_out = $cwd . "/" . $arg_val if $option eq "kbuild" or $option eq 'b';
 	$ah_out = $cwd . "/" . $arg_val if $option eq "autoheader" or $option eq 'a';
-	$kconf_out = $cwd . "/" . $arg_val if $option eq "kconfig" or $option eq 'c';
+	$kconf_out = $cwd . "/" . $arg_val if $option eq "kconfig" or $option eq 'k';
 	$confout = $arg_val if $option eq "confout" or $option eq 'c';
 	$make_in = $cwd . "/" . $arg_val if $option eq "make-in" or $option eq 'm';
 	$kconf_set = 1 if $option eq 'i' or $option eq "intree";
@@ -85,7 +86,7 @@ my $conf = read_confin $confin;
 
 # We don't need to actually configure to generate a Kconfig file
 if(defined $kconf_set) {
-	gen_kconfig($conf);
+	kconfig_gen(%$conf, $kconf_out);
 	exit 0;
 }
 
@@ -97,6 +98,8 @@ my @autoheader = ();
 my @configfile = ();
 
 for my $key (keys(%$conf)) {
+	next if $key eq "Kconfig_driver_info";
+	
 	if($conf->{$key}->{'type'} =~ /tristate/) {
 		print "Enable option \"$key\"? (Y/M/N/help) ";
 		$question = "Enable option \"$key\"? (Y/M/N/help) ";

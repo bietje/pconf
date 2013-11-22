@@ -9,8 +9,6 @@ use Cwd 'abs_path';
 use File::Basename;
 use PConf::Util;
 
-use Data::Dumper;
-
 use Exporter 'import';
 our $VERSION = '1.00';
 our @EXPORT = qw(kbuild_gen kbuild_gen_extra kbuild_add_option kbuild_add_ah_option);
