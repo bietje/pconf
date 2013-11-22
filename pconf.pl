@@ -65,7 +65,7 @@ while( my( $option, $arg_val, $pretty ) = Getopt::Mixed::nextOption()) {
 
 Getopt::Mixed::cleanup();
 
-my $confin = $cwd . "/" . $ARGV[0];
+my $confin = $ARGV[0];
 
 if(!defined $confin) {
 	die $help_text_short;
