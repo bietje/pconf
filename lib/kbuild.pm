@@ -27,6 +27,7 @@ sub kbuild_add_ah_option(\@$$);
 sub kbuild_gen($$$);
 sub kbuild_gen_extra($\@$\@);
 sub kbuild_gen_ah($$);
+sub kbuild_gen_make;
 
 #
 # kbuild_add_option(@array, $option, $value)
@@ -137,6 +138,11 @@ sub kbuild_gen_ah($$)
 
 	$ah_in->close;
 	$afd->close;
+}
+
+sub kbuild_gen_make
+{
+	
 }
 
 "1";
