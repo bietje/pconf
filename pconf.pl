@@ -32,6 +32,8 @@ PConf is a perl based configure script for Linux kernel modules.
 	-t --outoftree          When defined, the script will configure for an out-of-tree build.
 	-I --intree             When specified, the script will configure for an in-tree-build.
 	-m --make-in=PATH       When specified it will use this file as Makefile input.
+	-l --linux-root=PATH    Pointer to the Linux source tree.
+	-C --copy-include       If you build in-tree, you might want to copy the include files into the linux tree (needs -l).
 END_HELP
 
 # declare some argument parsing vars
