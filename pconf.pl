@@ -32,6 +32,8 @@ PConf is a perl based configure script for Linux kernel modules.
 	-t --outoftree          When defined, the script will configure for an out-of-tree build.
 	-I --intree             When specified, the script will configure for an in-tree-build.
 	-m --make-in=PATH       When specified it will use this file as Makefile input.
+	-l --linux-root=PATH    Pointer to the Linux source tree.
+	-C --copy-include       If you build in-tree, you might want to copy the include files into the linux tree (needs -l).
 END_HELP
 
 # declare some argument parsing vars
@@ -97,16 +99,17 @@ my $value;
 my $question;
 my @autoheader = ();
 my @configfile = ();
+my $name;
 
 for my $key (keys(%$conf)) {
-	next if $key eq "$PCONF_DRIVER_INFO";
-	
+	$name = ($key eq $PCONF_DRIVER_INFO) ? $conf->{$key}->{'name'} : $key;
+
 	if($conf->{$key}->{'type'} =~ /tristate/) {
-		print "Enable option \"$key\"? (Y/M/N/help) ";
-		$question = "Enable option \"$key\"? (Y/M/N/help) ";
+		print "Enable option \"$name\"? (Y/M/N/help) ";
+		$question = "Enable option \"$name\"? (Y/M/N/help) ";
 	} else {
-		print "Enable option \"$key\"? (Y/N/help) ";
-		$question = "Enable option \"$key\"? (Y/N/help) ";
+		print "Enable option \"$name\"? (Y/N/help) ";
+		$question = "Enable option \"$name\"? (Y/N/help) ";
 	}
 	$answer = lc <STDIN>;
 
@@ -137,8 +140,8 @@ for my $key (keys(%$conf)) {
 	}
 }
 
-kbuild_add_option(@configfile, $conf->{$PCONF_DRIVER_INFO}->{'definition'}, 'm');
-kbuild_add_ah_option(@autoheader, $conf->{$PCONF_DRIVER_INFO}->{'definition'}, '');
+# kbuild_add_option(@configfile, $conf->{$PCONF_DRIVER_INFO}->{'definition'}, 'm');
+# kbuild_add_ah_option(@autoheader, $conf->{$PCONF_DRIVER_INFO}->{'definition'}, '');
 
 kbuild_gen($kbuild_out, $confout, $make_in);
 kbuild_gen_extra($confout, @configfile, $ah_out, @autoheader);
